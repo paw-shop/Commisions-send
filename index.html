@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta
+      name="description"
+      content="Portal limpio para entregar archivos de comisiones."
+    >
+    <title>Commission Upload Portal</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Playfair+Display:wght@500;600;700;800&display=swap"
+      rel="stylesheet"
+    >
+    <link rel="stylesheet" href="./styles.css">
+  </head>
+  <body>
+    <div class="page-shell">
+      <!-- Barra superior fija con navegación simple. -->
+      <header class="topbar">
+        <a class="brand" href="#inicio">Commission Drop</a>
+        <nav class="nav">
+          <a href="#inicio">Inicio</a>
+          <a href="#subir">Formulario</a>
+          <a href="#ayuda">Proceso</a>
+          <a href="#archivos">Archivos</a>
+        </nav>
+      </header>
+
+      <main>
+        <!-- Hero principal con una frase corta y clara. -->
+        <section class="hero" id="inicio">
+          <div class="hero-copy reveal">
+            <p class="eyebrow">3D Artist / VRChat commissions</p>
+            <h1>Entrega directa, sin vueltas.</h1>
+            <p class="hero-quote">Un portal suave para mandar tu comisión.</p>
+            <div class="hero-actions">
+              <a class="button primary" href="#subir">Empezar</a>
+              <a class="button ghost" href="#ayuda">Ver proceso</a>
+            </div>
+          </div>
+
+          <!-- Tarjeta visual con pequeños highlights del portal. -->
+          <div class="hero-art reveal" aria-hidden="true">
+            <div class="hero-photo-frame">
+              <div class="hero-photo-overlay">
+                <span class="project-badge">Entrega lista</span>
+                <div class="hero-stat">
+                  <span>Múltiples archivos</span>
+                  <strong>Listo para recibir</strong>
+                </div>
+                <div class="hero-stat">
+                  <span>Progreso</span>
+                  <strong>Visible al instante</strong>
+                </div>
+                <div class="hero-stat">
+                  <span>Estilo</span>
+                  <strong>Pastel de vidrio</strong>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Zona principal con el formulario y paneles laterales. -->
+        <section class="desktop-layout">
+          <div class="desktop-columns">
+            <article class="window-shell upload-window reveal" id="subir">
+              <div class="window-header">
+                <div class="window-controls" aria-hidden="true">
+                  <span class="control control-close"></span>
+                  <span class="control control-minimize"></span>
+                  <span class="control control-expand"></span>
+                </div>
+                <p class="window-title">Subida.exe</p>
+              </div>
+
+              <div class="window-body">
+                <div class="section-heading">
+                  <p class="eyebrow">Formulario</p>
+                  <h2>Entrega de archivos</h2>
+                </div>
+
+                <form id="uploadForm" novalidate>
+                  <div class="grid">
+                    <label class="field">
+                      <span>Nombre del cliente</span>
+                      <input
+                        type="text"
+                        name="clientName"
+                        id="clientName"
+                        placeholder="Tu nombre"
+                        autocomplete="name"
+                        required
+                      >
+                    </label>
+
+                    <label class="field">
+                      <span>Email o usuario de Discord</span>
+                      <input
+                        type="text"
+                        name="contact"
+                        id="contact"
+                        placeholder="email@example.com o @usuario"
+                        autocomplete="email"
+                        required
+                      >
+                    </label>
+                  </div>
+
+                  <label class="field">
+                    <span>Descripción del proyecto</span>
+                    <textarea
+                      name="projectDescription"
+                      id="projectDescription"
+                      rows="5"
+                      placeholder="Cuéntame qué necesitas, el estilo, referencias importantes y cualquier detalle útil."
+                      required
+                    ></textarea>
+                  </label>
+
+                  <div class="dropzone" id="dropzone" tabindex="0" role="button" aria-label="Seleccionar archivos para subir">
+                    <input type="file" id="files" name="files" multiple>
+                    <div class="dropzone-icon">+</div>
+                    <div>
+                      <h3>Arrastra tus archivos o haz clic para elegirlos</h3>
+                      <p>Soporta varios archivos: refs, texturas, PDFs, audio, comprimidos y más.</p>
+                    </div>
+                  </div>
+
+                  <div class="file-summary" id="fileSummary">Aún no seleccionaste archivos.</div>
+
+                  <div class="progress-card">
+                    <div class="progress-label">
+                      <span>Progreso de subida</span>
+                      <span id="progressText">0%</span>
+                    </div>
+                    <div class="progress-track" aria-hidden="true">
+                      <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    <div class="substatus" id="subStatus">Lista para recibir archivos.</div>
+                  </div>
+
+                  <div class="actions">
+                    <button type="submit" class="button primary" id="submitBtn">Enviar entrega</button>
+                    <button type="button" class="button ghost" id="clearBtn">Limpiar formulario</button>
+                  </div>
+                </form>
+
+                <div class="message-stack" id="messageStack" aria-live="polite" aria-atomic="true"></div>
+              </div>
+            </article>
+
+            <aside class="sidebar-stack">
+              <!-- Explicación breve del flujo. -->
+              <article class="window-shell reveal" id="ayuda">
+                <div class="window-header">
+                  <div class="window-controls" aria-hidden="true">
+                    <span class="control control-close"></span>
+                    <span class="control control-minimize"></span>
+                    <span class="control control-expand"></span>
+                  </div>
+                  <p class="window-title">Proceso.exe</p>
+                </div>
+
+                <div class="window-body">
+                  <p class="eyebrow">Cómo funciona</p>
+                  <h2>Flujo de entrega</h2>
+                  <section class="highlights">
+                    <article>
+                      <span>01</span>
+                      <h3>Completa el formulario</h3>
+                      <p>Escribe tu nombre, contacto y una descripción clara del proyecto.</p>
+                    </article>
+                    <article>
+                      <span>02</span>
+                      <h3>Adjunta tus archivos</h3>
+                      <p>Sube una o varias referencias, texturas, documentos o paquetes comprimidos.</p>
+                    </article>
+                    <article>
+                      <span>03</span>
+                      <h3>Llega directo a mí</h3>
+                      <p>Yo recibo la entrega y la dejo lista para revisar.</p>
+                    </article>
+                  </section>
+                </div>
+              </article>
+
+              <!-- Panel con la lista de archivos seleccionados. -->
+              <article class="window-shell reveal" id="archivos">
+                <div class="window-header">
+                  <div class="window-controls" aria-hidden="true">
+                    <span class="control control-close"></span>
+                    <span class="control control-minimize"></span>
+                    <span class="control control-expand"></span>
+                  </div>
+                  <p class="window-title">Archivos.exe</p>
+                </div>
+
+                <div class="window-body">
+                  <p class="eyebrow">Archivos seleccionados</p>
+                  <h2>Lista de subida</h2>
+                  <div class="upload-list" id="uploadList" aria-label="Archivos seleccionados"></div>
+                </div>
+              </article>
+            </aside>
+          </div>
+        </section>
+      </main>
+
+      <!-- Pie breve del sitio. -->
+      <footer class="site-footer">
+        <div class="site-footer-copy">
+          <p class="site-footer-brand">Commission Drop</p>
+          <p class="site-footer-note">Portal de entrega de comisiones</p>
+        </div>
+      </footer>
+    </div>
+
+    <!-- Plantilla usada para pintar cada archivo seleccionado. -->
+    <template id="fileItemTemplate">
+      <article class="upload-item">
+        <div class="upload-item-top">
+          <div class="upload-item-name"></div>
+          <div class="upload-item-state"></div>
+        </div>
+        <div class="upload-item-meta"></div>
+        <div class="mini-track">
+          <div class="mini-fill"></div>
+        </div>
+      </article>
+    </template>
+
+    <script src="script.js"></script>
+  </body>
+</html>
