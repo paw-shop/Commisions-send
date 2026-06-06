@@ -20,6 +20,7 @@ const state = {
   completedFiles: 0,
   pendingResolve: null,
   pendingReject: null,
+  pendingLoadHandler: null,
   timeoutHandle: null
 };
 
@@ -358,7 +359,7 @@ function cleanupTransport() {
 
 function postSingleFile(payload) {
   return new Promise((resolve, reject) => {
-    const { form } = ensureTransport();
+    const { iframe, form } = ensureTransport();
     cleanupTransport();
 
     state.pendingResolve = resolve;
@@ -368,10 +369,32 @@ function postSingleFile(payload) {
       clearTimeout(state.timeoutHandle);
     }
 
+    let submitted = false;
+
+    if (state.pendingLoadHandler) {
+      iframe.removeEventListener("load", state.pendingLoadHandler);
+    }
+
+    state.pendingLoadHandler = () => {
+      if (!submitted || !state.pendingResolve) {
+        return;
+      }
+
+      window.setTimeout(() => {
+        if (state.pendingResolve) {
+          resolvePendingUpload({
+            ok: true,
+            token: payload.token,
+            fallback: true
+          });
+        }
+      }, 250);
+    };
+
+    iframe.addEventListener("load", state.pendingLoadHandler);
+
     state.timeoutHandle = window.setTimeout(() => {
-      state.pendingResolve = null;
-      state.pendingReject = null;
-      reject(new Error("La subida excedió el tiempo de espera. Revisa tu despliegue de Apps Script y vuelve a intentar."));
+      rejectPendingUpload(new Error("La subida excedió el tiempo de espera. Revisa tu despliegue de Apps Script y vuelve a intentar."));
     }, CONFIG.requestTimeoutMs);
 
     form.action = CONFIG.scriptUrl;
@@ -385,12 +408,13 @@ function postSingleFile(payload) {
       form.appendChild(input);
     });
 
+    submitted = true;
     form.submit();
   });
 }
 
 function handleIframeMessage(event) {
-  if (!CONFIG.allowedOrigins.includes(event.origin)) {
+  if (!isAllowedResponseOrigin(event.origin)) {
     return;
   }
 
@@ -403,22 +427,68 @@ function handleIframeMessage(event) {
     return;
   }
 
+  if (data.ok) {
+    resolvePendingUpload(data);
+    return;
+  }
+
+  rejectPendingUpload(new Error(data.error || "El servidor devolvió un error desconocido."));
+}
+
+function isAllowedResponseOrigin(origin) {
+  try {
+    const hostname = new URL(origin).hostname;
+
+    return CONFIG.allowedOrigins.includes(origin)
+      || hostname === "script.google.com"
+      || hostname === "script.googleusercontent.com"
+      || hostname.endsWith(".googleusercontent.com");
+  } catch (error) {
+    return false;
+  }
+}
+
+function resolvePendingUpload(data) {
   if (state.timeoutHandle) {
     clearTimeout(state.timeoutHandle);
     state.timeoutHandle = null;
   }
 
+  removePendingLoadHandler();
+
   const resolve = state.pendingResolve;
+  state.pendingResolve = null;
+  state.pendingReject = null;
+
+  resolve?.(data);
+}
+
+function rejectPendingUpload(error) {
+  if (state.timeoutHandle) {
+    clearTimeout(state.timeoutHandle);
+    state.timeoutHandle = null;
+  }
+
+  removePendingLoadHandler();
+
   const reject = state.pendingReject;
   state.pendingResolve = null;
   state.pendingReject = null;
 
-  if (data.ok) {
-    resolve?.(data);
+  reject?.(error);
+}
+
+function removePendingLoadHandler() {
+  if (!state.pendingLoadHandler) {
     return;
   }
 
-  reject?.(new Error(data.error || "El servidor devolvió un error desconocido."));
+  const iframe = document.getElementById("uploadTransport");
+  if (iframe) {
+    iframe.removeEventListener("load", state.pendingLoadHandler);
+  }
+
+  state.pendingLoadHandler = null;
 }
 
 function formatBytes(bytes) {
